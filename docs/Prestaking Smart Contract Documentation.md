@@ -179,7 +179,7 @@ function distributeRewards() internal {
             
             // Calculate percentage of reward to be received, and allocate it.
             // Reward is calculated down to a precision of three decimals.
-            uint256 reward = staker.amount.mul(100000).mul(dailyRewardPercentage).div(100000);
+            uint256 reward = staker.amount.mul(dailyRewardPercentage.add(100000)).div(100000).sub(staker.amount);
             staker.accumulatedReward = staker.accumulatedReward.add(reward);
         }
     }
