@@ -1,5 +1,5 @@
 var DuskToken = artifacts.require("./DuskToken.sol");
-var Prestaking = artifacts.require("./Prestaking.sol");
+var Prestaking = artifacts.require("./PrestakingProvisioner.sol");
 
 module.exports = function(deployer) {
   deployer.deploy(DuskToken, "Dusk Network", "DUSK").then(function() {

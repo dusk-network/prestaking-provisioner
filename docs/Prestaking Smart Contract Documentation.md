@@ -178,8 +178,8 @@ function distributeRewards() internal {
             }
             
             // Calculate percentage of reward to be received, and allocate it.
-            // Reward is calculated down to a precision of two decimals.
-            uint256 reward = staker.amount.mul(10000).mul(dailyRewardPercentage).div(10000);
+            // Reward is calculated down to a precision of three decimals.
+            uint256 reward = staker.amount.mul(100000).mul(dailyRewardPercentage).div(100000);
             staker.accumulatedReward = staker.accumulatedReward.add(reward);
         }
     }
@@ -208,7 +208,7 @@ For each staker, it first checks if the `startTime` is far enough in the past fo
 
 Back to the `distributeRewards` function. The contract will again loop through all of the stakers, making sure that a staker is `active` before allocating rewards. It also checks if there is a known `endTime`. This will be set the moment a staker requests to withdraw his stake. During the 7 day cooldown period, the staker should no longer be eligible to collect rewards, and this check should prevent that.
 
-Finally, the reward percentage is calculated, up to a precision of two decimals. That calculated reward will then be added to the stakers `accumulatedReward` variable.
+Finally, the reward percentage is calculated, up to a precision of three decimals. That calculated reward will then be added to the stakers `accumulatedReward` variable.
 
 #### Staker actions
 
@@ -270,13 +270,12 @@ function startWithdrawStake() external onlyStaker {
     // receives all of their allocated rewards, before setting an `endTime`.
     distributeRewards();
     staker.endTime = block.timestamp;
-    stakingPool = stakingPool.sub(staker.amount);
 }
 ```
 
 The contract checks if the caller is an active staker, and makes sure the 30 day initial lock-up has passed. Furthermore, it ensures that the staker has not already requested to withdraw their stake, and that they have no current cooldown going on for reward withdrawal.
 
-[Rewards are then distributed](#reward-distribution), to make sure all statistics are completely up-to-date. The stakers `endTime` field is then populated with the current time, to signify that the cooldown period of 7 days has begun, and that the staker can no longer reap any rewards. His stake is then removed from the `stakingPool`.
+[Rewards are then distributed](#reward-distribution), to make sure all statistics are completely up-to-date. The stakers `endTime` field is then populated with the current time, to signify that the cooldown period of 7 days has begun, and that the staker can no longer reap any rewards.
 
 After a 7 day cooldown, the staker can call `withdrawStake`.
 

@@ -1,7 +1,7 @@
 'use strict';
 
 const DuskToken = artifacts.require('DuskToken');
-const Prestaking = artifacts.require('Prestaking');
+const Prestaking = artifacts.require('PrestakingProvisioner');
 
 let tokenInstance;
 let prestakingInstance;

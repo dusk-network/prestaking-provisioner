@@ -524,11 +524,11 @@ contract Ownable is Context {
 }
 
 /**
- * @title The DUSK Prestaking Contract.
+ * @title The DUSK Provisioner Prestaking Contract.
  * @author Jules de Smit
  * @notice This contract will facilitate staking for the DUSK ERC-20 token.
  */
-contract Prestaking is Ownable {
+contract PrestakingProvisioner is Ownable {
     using SafeERC20 for IERC20;
     using SafeMath for uint256;
     
@@ -550,8 +550,7 @@ contract Prestaking is Ownable {
     address[] public allStakers;
     uint256 public minimumStake;
     uint256 public maximumStake;
-    uint256 public dailyReward;
-    uint256 public stakingPool;
+    uint256 public dailyRewardPercentage;
     
     uint private lastUpdated;
     
@@ -561,11 +560,11 @@ contract Prestaking is Ownable {
         _;
     }
     
-    constructor(IERC20 token, uint256 min, uint256 max, uint256 reward) public {
+    constructor(IERC20 token, uint256 min, uint256 max, uint256 rewardPercentage) public {
         _token = token;
         minimumStake = min;
         maximumStake = max;
-        dailyReward = reward;
+        dailyRewardPercentage = rewardPercentage;
         lastUpdated = block.timestamp;
     }
     
@@ -599,13 +598,15 @@ contract Prestaking is Ownable {
     }
 
     /**
-     * @notice Update the daily reward amount.
+     * @notice Update the daily reward percentage.
      * Can only be called by the contract owner.
      * 
-     * @param amount The amount to set the daily reward to.
+     * @param rewardPercentage The amount to set the daily reward percentage to.
+     * Note that the reward percentage is precise to three decimals. E.g. setting it to
+     * `1000` gives you 1% increase per day.
      */
-    function updateDailyReward(uint256 amount) external onlyOwner {
-        dailyReward = amount;
+    function updateDailyRewardPercentage(uint256 rewardPercentage) external onlyOwner {
+        dailyRewardPercentage = rewardPercentage;
     }
     
     /**
@@ -677,7 +678,6 @@ contract Prestaking is Ownable {
         // receives all of their allocated rewards, before setting an `endTime`.
         distributeRewards();
         staker.endTime = block.timestamp;
-        stakingPool = stakingPool.sub(staker.amount);
     }
     
     /**
@@ -725,8 +725,8 @@ contract Prestaking is Ownable {
                 }
                 
                 // Calculate percentage of reward to be received, and allocate it.
-                // Reward is calculated down to a precision of two decimals.
-                uint256 reward = staker.amount.mul(10000).div(stakingPool).mul(dailyReward).div(10000);
+                // Reward is calculated down to a precision of three decimals.
+                uint256 reward = staker.amount.mul(100000).mul(dailyRewardPercentage).div(100000);
                 staker.accumulatedReward = staker.accumulatedReward.add(reward);
             }
         }
@@ -743,7 +743,6 @@ contract Prestaking is Ownable {
             // If this staker has just become active, update the staking pool size.
             if (!staker.active && lastUpdated.sub(staker.startTime) >= 1 days) {
                 staker.active = true;
-                stakingPool = stakingPool.add(staker.amount);
             }
         }
     }
