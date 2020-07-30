@@ -1,6 +1,6 @@
-# DUSK Pre-staking Contract
+# DUSK Provisioner Pre-staking Contract
 
-This document aims to explain the inner workings of the DUSK Pre-staking contract.
+This document aims to explain the inner workings of the DUSK Provisioner Pre-staking contract.
 
 ## Introduction
 
@@ -8,7 +8,7 @@ The goal of this contract is to allow holders of the DUSK ERC-20 token to lock u
 - A stake becomes 'active' (eligible for reaping rewards) 24 hours after submission.
 - Rewards are allocated on a per-day basis, meaning that for every 24 hours that a stake is active, a reward is given. If a stake is withdrawn anywhere before the 24-hour mark, that days reward is forfeited.
 - Stakes may only be withdrawn after having staked for 30 days or more.
-- Rewards are distributed according to stake size. If a user has staked 1M in a 10M pool, he is entitled to 10% of the daily reward.
+- Rewards are distributed according to stake size, and the % reward is always fixed, no matter how many people join in.
 - Each action performed by a staker has a 7 day cooldown, meaning that a reward or stake can only be actually withdrawn after 7 days of initially requesting so.
 - The daily reward and the minimum/maximum staking amounts should be updateable variables on the contract, only allowed to be updated by the contract owner.
 
@@ -67,17 +67,14 @@ mapping(address => Staker) public stakersMap;
 address[] public allStakers;
 uint256 public minimumStake;
 uint256 public maximumStake;
-uint256 public dailyReward;
-uint256 public stakingPool;
+uint256 public dailyRewardPercentage;
 ```
 
 `stakersMap` is a mapping of stakers addresses, to their information, stored in a `Staker` struct.
 
 `allStakers` is a list of all addresses, of people that have staked.
 
-`minimumStake`, `maximumStake` and `dailyReward` should be self-explanatory.
-
-`stakingPool` will hold the total amount of DUSK staked at any given time.
+`minimumStake`, `maximumStake` and `dailyRewardPercentage` should be self-explanatory.
 
 And, at the very end, we also declare a variable to hold a timestamp.
 
@@ -92,11 +89,11 @@ This variable tells the contract when the last rewards distribution took place, 
 The constructor is used to initialise a couple of the aforementioned global [variables](#variables).
 
 ```
-constructor(IERC20 token, uint256 min, uint256 max, uint256 reward) public {
+constructor(IERC20 token, uint256 min, uint256 max, uint256 rewardPercentage) public {
     _token = token;
     minimumStake = min;
     maximumStake = max;
-    dailyReward = reward;
+    dailyRewardPercentage = reward;
     lastUpdated = block.timestamp;
 }
 ```
@@ -182,7 +179,7 @@ function distributeRewards() internal {
             
             // Calculate percentage of reward to be received, and allocate it.
             // Reward is calculated down to a precision of two decimals.
-            uint256 reward = staker.amount.mul(10000).div(stakingPool).mul(dailyReward).div(10000);
+            uint256 reward = staker.amount.mul(10000).mul(dailyRewardPercentage).div(10000);
             staker.accumulatedReward = staker.accumulatedReward.add(reward);
         }
     }
@@ -202,7 +199,6 @@ function updateStakingPool() internal {
         // If this staker has just become active, update the staking pool size.
         if (!staker.active && lastUpdated.sub(staker.startTime) >= 1 days) {
             staker.active = true;
-            stakingPool = stakingPool.add(staker.amount);
         }
     }
 }
@@ -322,8 +318,8 @@ function updateMaximumStake(uint256 amount) external onlyOwner {
     maximumStake = amount;
 }
 
-function updateDailyReward(uint256 amount) external onlyOwner {
-    dailyReward = amount;
+function updateDailyRewardPercentage(uint256 rewardPercentage) external onlyOwner {
+    dailyRewardPercentage = rewardPercentage;
 }
 ```
 
