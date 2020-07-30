@@ -198,9 +198,9 @@ contract('Prestaking', async (accounts) => {
 			await prestakingInstance.startWithdrawReward({ from: accounts[1], gas: '1000000' });
 
 			// Staker has been staking for 7 days, meaning that he should be getting:
-			// 7 * (200 * 0.5) = 700
+			// 7 * (250000 * 0.0002) = 350
 			let staker = await prestakingInstance.stakersMap.call(accounts[1], { from: accounts[1] });
-			assert.strictEqual(staker.pendingReward.toString(), "700");
+			assert.strictEqual(staker.pendingReward.toString(), "350");
 			assert.strictEqual(staker.accumulatedReward.toString(), "0");
 			assert.notEqual(staker.cooldownTime.toNumber(), 0);
 		});
@@ -237,7 +237,7 @@ contract('Prestaking', async (accounts) => {
 			assert.strictEqual(staker.pendingReward.toString(), "0");
 			assert.strictEqual(staker.cooldownTime.toString(), "0");
 			let balance = await tokenInstance.balanceOf.call(accounts[1], { from: accounts[1] });
-			assert.strictEqual(balance.toString(), "700")
+			assert.strictEqual(balance.toString(), "350")
 		});
 	});
 
@@ -251,9 +251,9 @@ contract('Prestaking', async (accounts) => {
 			await prestakingInstance.startWithdrawStake({ from: accounts[1], gas: '1000000' });
 
 			// Staker should have accumulated another 23 days of rewards.
-			// 23 * (200 * 0.5) = 2300
+			// 23 * (250000 * 0.0002) = 1150
 			let staker = await prestakingInstance.stakersMap.call(accounts[1], { from: accounts[1] });
-			assert.strictEqual(staker.accumulatedReward.toString(), "2300");
+			assert.strictEqual(staker.accumulatedReward.toString(), "1150");
 		});
 
 		it('should not allow the staker to withdraw his stake before the cooldown ends', async () => {
@@ -295,9 +295,9 @@ contract('Prestaking', async (accounts) => {
 
 			// Check that the staker got his money
 			// He should have gotten his initial stake, the first reward withdrawal, and the remaining reward
-			// credited to his account, which is 700 + 250000 + 2300 = 253000
+			// credited to his account, which is 350 + 250000 + 1150 = 251500
 			let balance = await tokenInstance.balanceOf.call(accounts[1], { from: accounts[1] });
-			assert.strictEqual(balance.toString(), "253000")
+			assert.strictEqual(balance.toString(), "251500")
 		});
 
 		it('should delete the staker from the storage after his stake is withdrawn', async () => {
@@ -343,7 +343,7 @@ contract('Prestaking', async (accounts) => {
 
 		it('should not allow a non-owner to adjust the daily reward', async () => {
 			try {
-				await prestakingInstance.updateDailyReward(100, { from: accounts[9], gas: '1000000' });
+				await prestakingInstance.updateDailyRewardPercentage(100, { from: accounts[9], gas: '1000000' });
 				assert(false);
 			} catch(e) {
 				assert(true);
@@ -377,7 +377,7 @@ contract('Prestaking', async (accounts) => {
 		});
 
 		it('should allow the owner to adjust the daily reward', async () => {
-			await prestakingInstance.updateDailyReward(100, { from: accounts[0], gas: '1000000' });
+			await prestakingInstance.updateDailyRewardPercentage(100, { from: accounts[0], gas: '1000000' });
 		});
 	});
 
