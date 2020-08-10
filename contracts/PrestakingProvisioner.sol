@@ -44,12 +44,12 @@ contract PrestakingProvisioner is Ownable {
         _;
     }
     
-    constructor(IERC20 token, uint256 min, uint256 max, uint256 rewardPercentage) public {
+    constructor(IERC20 token, uint256 min, uint256 max, uint256 rewardPercentage, uint timestamp) public {
         _token = token;
         minimumStake = min;
         maximumStake = max;
         dailyRewardPercentage = rewardPercentage;
-        lastUpdated = block.timestamp;
+        lastUpdated = timestamp;
     }
     
     /**
