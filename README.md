@@ -1,6 +1,6 @@
 # DUSK Provisioner Pre-staking Ethereum Smart Contract
 
-This repository contains the smart contract code for the DUSK provisioner pre-staking contract. The aim is to have a smart contract, which can lock up DUSK ERC-20 tokens, in return for a daily reward. It is almost entirely identical to the [block generator pre-staking contract](https://github.com/dusk-network/prestaking-contract).
+This repository contains the smart contract code for the DUSK provisioner pre-staking contract. The aim is to have a smart contract, which can lock up DUSK ERC-20 tokens, in return for a daily reward. It is used for the [DUSK staking campaign](https://staking.dusk.network/). It is almost entirely identical to the [block generator pre-staking contract](https://github.com/dusk-network/prestaking-contract).
 
 For testing purposes, this repository also contains the smart contract code for the DUSK ERC-20 token. This contract can otherwise be ignored.
 
