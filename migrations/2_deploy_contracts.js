@@ -3,6 +3,6 @@ var Prestaking = artifacts.require("./PrestakingProvisioner.sol");
 
 module.exports = function(deployer) {
   deployer.deploy(DuskToken, "Dusk Network", "DUSK").then(function() {
-    return deployer.deploy(Prestaking, DuskToken.address, 20);
+    return deployer.deploy(Prestaking, DuskToken.address);
   });
 };

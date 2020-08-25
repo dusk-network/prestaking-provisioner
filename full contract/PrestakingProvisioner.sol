@@ -548,7 +548,6 @@ contract PrestakingProvisioner is Ownable {
     }
     
     mapping(address => Staker) public stakersMap;
-    uint256 public dailyRewardPercentage;
     uint256 public stakersAmount;
 
     uint public deactivationTime;
@@ -570,9 +569,8 @@ contract PrestakingProvisioner is Ownable {
         _;
     }
     
-    constructor(IERC20 token, uint256 rewardPercentage) public {
+    constructor(IERC20 token) public {
         _token = token;
-        dailyRewardPercentage = rewardPercentage;
     }
     
     /**
@@ -603,7 +601,7 @@ contract PrestakingProvisioner is Ownable {
     function returnStake(address _staker) external onlyOwner {
         Staker storage staker = stakersMap[_staker];
         require(staker.amount > 0, "This person is not staking");
-        
+
         uint comparisonTime = block.timestamp;
         if (deactivationTime != 0) {
             comparisonTime = deactivationTime;
@@ -635,7 +633,7 @@ contract PrestakingProvisioner is Ownable {
         staker.amount = amount;
         staker.startTime = blockTimestamp;
         staker.lastUpdated = blockTimestamp;
-        staker.dailyReward = amount.mul(dailyRewardPercentage.add(100000)).div(100000).sub(amount);
+        staker.dailyReward = amount.mul(100020).div(100000).sub(amount);
         stakersAmount++;
         
         // Transfer the DUSK to this contract.
@@ -680,7 +678,7 @@ contract PrestakingProvisioner is Ownable {
         Staker storage staker = stakersMap[msg.sender];
         uint blockTimestamp = block.timestamp;
         require(staker.startTime.add(30 days) <= blockTimestamp, "Stakes can only be withdrawn 30 days after initial lock up");
-        require(staker.endTime == 0, "Stake already withdrawn");
+        require(staker.endTime == 0, "Stake withdrawal already in progress");
         require(staker.cooldownTime == 0, "A withdrawal call has been triggered - please wait for it to complete before withdrawing your stake");
         
         // We distribute the rewards first, so that the withdrawing staker
@@ -701,7 +699,7 @@ contract PrestakingProvisioner is Ownable {
         Staker storage staker = stakersMap[msg.sender];
         uint blockTimestamp = block.timestamp;
         require(staker.startTime.add(30 days) <= blockTimestamp, "Stakes can only be withdrawn 30 days after initial lock up");
-        require(staker.endTime == 0, "Stake already withdrawn");
+        require(staker.endTime == 0, "Stake withdrawal already in progress");
         require(staker.cooldownTime == 0, "A withdrawal call has been triggered - please wait for it to complete before withdrawing your stake");
         
         // We distribute the rewards first, so that the withdrawing staker

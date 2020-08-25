@@ -32,7 +32,6 @@ contract PrestakingProvisioner is Ownable {
     }
     
     mapping(address => Staker) public stakersMap;
-    uint256 public dailyRewardPercentage;
     uint256 public stakersAmount;
 
     uint public deactivationTime;
@@ -54,9 +53,8 @@ contract PrestakingProvisioner is Ownable {
         _;
     }
     
-    constructor(IERC20 token, uint256 rewardPercentage) public {
+    constructor(IERC20 token) public {
         _token = token;
-        dailyRewardPercentage = rewardPercentage;
     }
     
     /**
@@ -119,7 +117,7 @@ contract PrestakingProvisioner is Ownable {
         staker.amount = amount;
         staker.startTime = blockTimestamp;
         staker.lastUpdated = blockTimestamp;
-        staker.dailyReward = amount.mul(dailyRewardPercentage.add(100000)).div(100000).sub(amount);
+        staker.dailyReward = amount.mul(100020).div(100000).sub(amount);
         stakersAmount++;
         
         // Transfer the DUSK to this contract.

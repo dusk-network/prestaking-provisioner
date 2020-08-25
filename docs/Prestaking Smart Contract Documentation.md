@@ -67,13 +67,10 @@ Before moving on, we declare a few more global variables for the contract.
 
 ```
 mapping(address => Staker) public stakersMap;
-uint256 public dailyRewardPercentage;
 uint256 public stakersAmount;
 ```
 
 `stakersMap` is a mapping of stakers addresses, to their information, stored in a `Staker` struct.
-
-`dailyRewardPercentage` should be self-explanatory.
 
 And we also declare a variable to hold the amount of stakers active in the contract at any given time.
 
@@ -88,13 +85,13 @@ This variable is set when the contract is deactivated, and should hold the exact
 The constructor is used to initialise a couple of the aforementioned [global variables](#variables).
 
 ```
-constructor(IERC20 token, uint256 rewardPercentage) public {
+constructor(IERC20 token) public {
     _token = token;
     dailyRewardPercentage = reward;
 }
 ```
 
-It simply sets the token contract address and the daily reward.
+It simply sets the token contract address.
 
 ### Modifiers
 
@@ -157,7 +154,7 @@ function stake(uint256 amount) external onlyActive {
     staker.amount = amount;
     staker.startTime = blockTimestamp;
     staker.lastUpdated = blockTimestamp;
-    staker.dailyReward = amount.mul(dailyRewardPercentage.add(100000)).div(100000).sub(amount);
+    staker.dailyReward = amount.mul(100020).div(100000).sub(amount);
     stakersAmount++;
     
     // Transfer the DUSK to this contract.
